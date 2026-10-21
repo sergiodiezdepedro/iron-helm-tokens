@@ -7,7 +7,7 @@ Webapp para llevar la cuenta de los tokens de un jugador y de los que quedan en 
 - Consultar en tiempo real cuántos tokens quedan en la reserva y cuántos están en poder del jugador.
 - Obtener o gastar tokens normales. Obtenerlos los resta de la reserva; gastarlos los devuelve.
 - Robar tokens de Bendición al azar, manteniendo sus reversos ocultos.
-- Gastar una Bendición para repetir los dados sin revelar su reverso. La ficha vuelve al mazo.
+- Gastar una Bendición para repetir los dados sin revelar su reverso. La ficha se consume y no vuelve al mazo.
 - Activar Presencia Divina para revelar y consumir todas las Bendiciones del jugador, aplicar sus recompensas y mostrar un resumen.
 - Reiniciar la cuenta, devolviendo todos los tokens a sus reservas y mezclando de nuevo las Bendiciones.
 - Conservar la partida en el almacenamiento local del navegador al recargar la página.
@@ -33,7 +33,7 @@ También hay 12 tokens de Bendición. Cada vez que se reinicia la cuenta, se mez
 | Corazón rojo con valor 2   |        3 | Obtiene 2 tokens de Salud                            |
 | Energía morada con valor 1 |        4 | Obtiene 1 token de Energía                           |
 
-Las recompensas de Salud y Energía están limitadas por la cantidad de tokens que queda en sus respectivas reservas. Un corazón verde elimina todo el Veneno del inventario del jugador. Al resolver Presencia Divina, las Bendiciones reveladas se consumen y salen del pool.
+Las recompensas de Salud y Energía están limitadas por la cantidad de tokens que queda en sus respectivas reservas. Un corazón verde elimina todo el Veneno del inventario del jugador. Las Bendiciones consumidas para repetir dados o al resolver Presencia Divina salen del juego y no vuelven al pool.
 
 ## Requisitos
 

@@ -216,11 +216,8 @@ function App() {
       if (current.held.length === 0) return current;
 
       const held = [...current.held];
-      const faceIndex = Math.floor(Math.random() * held.length);
-      const [face] = held.splice(faceIndex, 1);
-      const pool = [...current.pool];
-      pool.splice(Math.floor(Math.random() * (pool.length + 1)), 0, face);
-      return { pool, held };
+      held.splice(Math.floor(Math.random() * held.length), 1);
+      return { ...current, held };
     });
   }
 
@@ -421,7 +418,7 @@ function App() {
                 type="button"
                 onClick={spendBlessingForReroll}
                 disabled={blessings.held.length === 0}
-                title="Devuelve una bendición oculta al arcón">
+                title="Consume una bendición sin revelar su reverso">
                 <RotateCcw size={14} aria-hidden="true" />
                 Repetir dados
               </button>
@@ -435,8 +432,9 @@ function App() {
               </button>
             </div>
             <p className="blessing-footnote">
-              Las bendiciones se obtienen a ciegas. Repetir dados devuelve una
-              al arcón; Presencia Divina revela y consume todas las que llevas.
+              Las bendiciones se obtienen a ciegas. Repetir dados consume una
+              sin revelarla; Presencia Divina revela y consume todas las que
+              llevas.
             </p>
           </div>
         </section>
