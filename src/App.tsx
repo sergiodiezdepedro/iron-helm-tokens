@@ -291,12 +291,15 @@ function App() {
   return (
     <main className="app-shell">
       <header className="topbar">
-        <a className="wordmark" href="#inicio" aria-label="Iron Helm, inicio">
+        <a
+          className="wordmark"
+          href="https://boardgamegeek.com/boardgame/273264/iron-helm"
+          aria-label="Iron Helm BGG">
           <span className="wordmark-mark">
             <Shield size={20} strokeWidth={1.8} />
           </span>
           <span>
-            IRON HELM <small>LIBRO DE CAMPAÑA</small>
+            IRON HELM <small>BGG</small>
           </span>
         </a>
         <div className="topbar-actions">
@@ -326,9 +329,7 @@ function App() {
 
       <div className="content" id="inicio">
         <section className="intro" aria-labelledby="page-title">
-          <p className="eyebrow">
-            REGISTRO DEL AVENTURERO <span>·</span> TEMPORADA I
-          </p>
+          <p className="eyebrow">REGISTRO DEL AVENTURERO</p>
           <h1 id="page-title">
             Reserva de <em>aventura</em>
           </h1>

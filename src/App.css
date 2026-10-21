@@ -341,7 +341,7 @@ h2 {
 .token-info p {
   margin-bottom: 8px;
   color: var(--subtle);
-  font-size: 10px;
+  font-size: 12px;
 }
 
 .progress-track {
@@ -538,7 +538,7 @@ h2 {
 
 .empty-hand {
   color: var(--empty-text);
-  font-size: 11px;
+  font-size: 14px;
   font-style: italic;
 }
 
@@ -578,8 +578,8 @@ h2 {
 .blessing-footnote {
   margin: 13px 0 0;
   color: var(--subtle);
-  font-size: 10px;
-  line-height: 1.5;
+  font-size: 13px;
+  line-height: 1.6;
 }
 
 .report-backdrop {
