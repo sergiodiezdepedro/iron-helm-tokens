@@ -8,6 +8,8 @@ import {
   Shield,
   Skull,
   Sparkles,
+  Sun,
+  Moon,
   Wheat,
   X,
   Zap,
@@ -50,6 +52,7 @@ type TokenId = (typeof tokenTypes)[number]["id"];
 type Inventory = Record<TokenId, number>;
 type BlessingFace = "poison" | "healthOne" | "healthTwo" | "energy";
 type BlessingState = { pool: BlessingFace[]; held: BlessingFace[] };
+type Theme = "dark" | "light";
 type DivineReport = {
   faces: BlessingFace[];
   healthGained: number;
@@ -89,6 +92,16 @@ const initialInventory: Inventory = {
 
 const storageKey = "iron-helm-token-inventory";
 const blessingStorageKey = "iron-helm-blessing-inventory";
+const themeStorageKey = "iron-helm-theme";
+
+function loadTheme(): Theme {
+  try {
+    const saved = localStorage.getItem(themeStorageKey);
+    return saved === "light" || saved === "dark" ? saved : "dark";
+  } catch {
+    return "dark";
+  }
+}
 
 function createBlessingState(): BlessingState {
   const pool = [...blessingComposition];
@@ -160,6 +173,8 @@ function App() {
   const [inventory, setInventory] = useState<Inventory>(loadInventory);
   const [blessings, setBlessings] = useState<BlessingState>(loadBlessings);
   const [divineReport, setDivineReport] = useState<DivineReport | null>(null);
+  const [isResetDialogOpen, setIsResetDialogOpen] = useState(false);
+  const [theme, setTheme] = useState<Theme>(loadTheme);
   const standardTokenTotal = tokenTypes.reduce(
     (sum, token) => sum + token.total,
     0,
@@ -182,6 +197,22 @@ function App() {
     localStorage.setItem(blessingStorageKey, JSON.stringify(blessings));
   }, [blessings]);
 
+  useEffect(() => {
+    document.documentElement.dataset.theme = theme;
+    localStorage.setItem(themeStorageKey, theme);
+  }, [theme]);
+
+  useEffect(() => {
+    if (!isResetDialogOpen) return;
+
+    function closeOnEscape(event: KeyboardEvent) {
+      if (event.key === "Escape") setIsResetDialogOpen(false);
+    }
+
+    window.addEventListener("keydown", closeOnEscape);
+    return () => window.removeEventListener("keydown", closeOnEscape);
+  }, [isResetDialogOpen]);
+
   function changeAmount(id: TokenId, change: number) {
     setInventory((current) => ({
       ...current,
@@ -193,11 +224,18 @@ function App() {
   }
 
   function resetInventory() {
-    if (window.confirm("¿Quieres devolver todas las fichas a la reserva?")) {
-      setInventory(initialInventory);
-      setBlessings(createBlessingState());
-      setDivineReport(null);
-    }
+    setIsResetDialogOpen(true);
+  }
+
+  function toggleTheme() {
+    setTheme((current) => (current === "dark" ? "light" : "dark"));
+  }
+
+  function confirmResetInventory() {
+    setInventory(initialInventory);
+    setBlessings(createBlessingState());
+    setDivineReport(null);
+    setIsResetDialogOpen(false);
   }
 
   function takeBlessing() {
@@ -261,10 +299,29 @@ function App() {
             IRON HELM <small>LIBRO DE CAMPAÑA</small>
           </span>
         </a>
-        <button className="reset-button" type="button" onClick={resetInventory}>
-          <RotateCcw size={15} aria-hidden="true" />
-          <span>Reiniciar cuenta</span>
-        </button>
+        <div className="topbar-actions">
+          <button
+            className="theme-toggle"
+            type="button"
+            onClick={toggleTheme}
+            aria-label={`Cambiar a tema ${theme === "dark" ? "claro" : "oscuro"}`}
+            aria-pressed={theme === "dark"}
+            title={`Cambiar a tema ${theme === "dark" ? "claro" : "oscuro"}`}>
+            {theme === "dark" ? (
+              <Sun size={16} aria-hidden="true" />
+            ) : (
+              <Moon size={16} aria-hidden="true" />
+            )}
+            <span>{theme === "dark" ? "Claro" : "Oscuro"}</span>
+          </button>
+          <button
+            className="reset-button"
+            type="button"
+            onClick={resetInventory}>
+            <RotateCcw size={15} aria-hidden="true" />
+            <span>Reiniciar cuenta</span>
+          </button>
+        </div>
       </header>
 
       <div className="content" id="inicio">
@@ -281,18 +338,18 @@ function App() {
         </section>
 
         <section className="summary" aria-label="Resumen de fichas">
-          <div className="summary-item">
-            <span className="summary-label">En la reserva</span>
-            <strong>
-              {reserveTokens}
-              <small>/{totalTokens}</small>
-            </strong>
-          </div>
           <div className="summary-item summary-carried">
             <span className="summary-label">En tu poder</span>
             <strong>
               {carriedTokens}
               <small> {carriedTokens === 1 ? "ficha" : "fichas"}</small>
+            </strong>
+          </div>
+          <div className="summary-item summary-reserve">
+            <span className="summary-label">En la reserva</span>
+            <strong>
+              {reserveTokens}
+              <small>/{totalTokens}</small>
             </strong>
           </div>
           <div className="summary-note">
@@ -334,13 +391,18 @@ function App() {
                     </div>
                   </div>
                   <div
+                    className="carried-count"
+                    aria-label={`${carried} en tu poder`}>
+                    <strong>{carried}</strong>
+                    <span>TENGO</span>
+                  </div>
+                  <div
                     className="token-count"
                     aria-label={`${available} en reserva, ${carried} en tu poder`}>
                     <strong>{available}</strong>
                     <span>EN RESERVA</span>
                   </div>
                   <div className="token-actions">
-                    <span className="carried-count">{carried} contigo</span>
                     <div className="action-buttons">
                       <button
                         className="action-button take-button"
@@ -488,6 +550,49 @@ function App() {
               onClick={() => setDivineReport(null)}>
               Continuar
             </button>
+          </section>
+        </div>
+      )}
+
+      {isResetDialogOpen && (
+        <div
+          className="report-backdrop"
+          onClick={(event) => {
+            if (event.target === event.currentTarget) {
+              setIsResetDialogOpen(false);
+            }
+          }}>
+          <section
+            className="divine-report reset-dialog"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="reset-title"
+            aria-describedby="reset-description">
+            <span className="report-emblem">
+              <RotateCcw size={20} aria-hidden="true" />
+            </span>
+            <p className="eyebrow">NUEVA PARTIDA</p>
+            <h2 id="reset-title">Reiniciar cuenta</h2>
+            <p className="report-outcome" id="reset-description">
+              Se devolverán al arcón todos los tokens y el mazo de Bendiciones
+              volverá a su composición inicial. Esta acción no se puede
+              deshacer.
+            </p>
+            <div className="reset-actions">
+              <button
+                className="action-button reset-cancel"
+                type="button"
+                autoFocus
+                onClick={() => setIsResetDialogOpen(false)}>
+                Cancelar
+              </button>
+              <button
+                className="report-done reset-confirm"
+                type="button"
+                onClick={confirmResetInventory}>
+                Reiniciar cuenta
+              </button>
+            </div>
           </section>
         </div>
       )}

@@ -10,7 +10,9 @@ Webapp para llevar la cuenta de los tokens de un jugador y de los que quedan en 
 - Gastar una Bendición para repetir los dados sin revelar su reverso. La ficha se consume y no vuelve al mazo.
 - Activar Presencia Divina para revelar y consumir todas las Bendiciones del jugador, aplicar sus recompensas y mostrar un resumen.
 - Reiniciar la cuenta, devolviendo todos los tokens a sus reservas y mezclando de nuevo las Bendiciones.
+- Cambiar entre los temas Dark y Light desde el encabezado. Dark es el tema inicial.
 - Conservar la partida en el almacenamiento local del navegador al recargar la página.
+- Recordar la preferencia de tema en el navegador.
 
 ## Composición de la reserva
 
@@ -77,6 +79,6 @@ npm run preview
 - **Vite 6** para el servidor de desarrollo y la compilación.
 - **CSS** propio para el diseño adaptable a escritorio y móvil.
 - **Lucide React** para los iconos.
-- **`localStorage`** para guardar el inventario normal y el estado del mazo de Bendición en el navegador actual.
+- **`localStorage`** para guardar el inventario, el mazo de Bendición y el tema seleccionado en el navegador actual.
 
 La aplicación no necesita una cuenta, un backend ni una base de datos. El progreso no se sincroniza entre navegadores o dispositivos; borrar los datos del sitio también borra la partida guardada. La lógica y la interfaz principal están en `src/App.tsx`, y sus estilos en `src/App.css` e `src/index.css`.

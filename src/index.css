@@ -1,20 +1,144 @@
 :root {
   font-family: "Avenir Next", Avenir, "Trebuchet MS", sans-serif;
-  color: #24332c;
-  background: #f2efe6;
+  color-scheme: dark;
+  color: var(--ink);
+  background: var(--canvas);
   font-synthesis: none;
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   font-weight: 400;
 
+  --canvas: #1c231e;
+  --header-surface: rgba(28, 35, 30, 0.94);
+  --paper: #252e27;
+  --surface-soft: #303a32;
+  --surface-hover: #354037;
+  --surface-row: rgba(37, 46, 39, 0.88);
+  --surface-shadow: 0 3px 12px rgba(0, 0, 0, 0.2);
+  --ink: #eee9d9;
+  --muted: #adb09f;
+  --subtle: #a0a393;
+  --subtle-strong: #c1c2b3;
+  --subtle-soft: #959888;
+  --text-soft: #c0c2b3;
+  --line: #414b42;
+  --line-strong: #4c574c;
+  --line-soft: #3d473e;
+  --forest: #a2b996;
+  --forest-hover: #bccdac;
+  --rust: #df967c;
+  --rust-hover: #edaa8e;
+  --brass: #d4b56f;
+  --on-accent: #202720;
+  --accent-border: #795647;
+  --accent-background: #3a2d28;
+  --accent-text: #f0b29b;
+  --border-soft: #4b554a;
+  --seal-border: #887b57;
+  --progress-track: #3a453c;
+  --control-border: #566154;
+  --footer-rule: #5a6254;
+  --gold-color: #e5c174;
+  --gold-surface: #433a28;
+  --health-color: #ed9589;
+  --health-surface: #46302e;
+  --poison-color: #a9c391;
+  --poison-surface: #34402f;
+  --energy-color: #e7ad6a;
+  --energy-surface: #47382b;
+  --ration-color: #c8b891;
+  --ration-surface: #403c30;
+  --blessing-border: #4c5749;
+  --blessing-intro: #c0c2b2;
+  --card-border: #71806d;
+  --card-background: repeating-linear-gradient(
+    135deg,
+    #354036 0 4px,
+    #3b473b 4px 8px
+  );
+  --card-shadow: #202821;
+  --empty-text: #adb09f;
+  --divine-text: #d8bc7b;
+  --divine-hover: #bb9750;
+  --overlay: rgba(7, 11, 8, 0.76);
+  --modal-border: #596353;
+  --modal-shadow: 0 18px 60px rgba(0, 0, 0, 0.5);
+  --modal-close: #c0c2b3;
+  --revealed-background: #313b33;
+  --revealed-text: #dce3d4;
+  --report-text: #d0d2c4;
+  --focus-color: #e3ae76;
+  --selection-text: #fffdf6;
+  --selection-background: #49664e;
+  --texture-line: rgba(221, 227, 213, 0.025);
+}
+
+:root[data-theme="light"] {
+  color-scheme: light;
+  --canvas: #f2efe6;
+  --header-surface: rgba(248, 246, 239, 0.82);
+  --paper: #f8f6ef;
+  --surface-soft: #ece8db;
+  --surface-hover: #fbfaf5;
+  --surface-row: rgba(248, 246, 239, 0.76);
+  --surface-shadow: 0 3px 12px rgba(48, 48, 36, 0.035);
   --ink: #24332c;
   --muted: #78796d;
-  --paper: #f8f6ef;
+  --subtle: #858579;
+  --subtle-strong: #77786e;
+  --subtle-soft: #929185;
+  --text-soft: #74766b;
   --line: #dfdbce;
+  --line-strong: #d7d3c8;
+  --line-soft: #e2ded2;
   --forest: #334e3e;
+  --forest-hover: #243c2d;
   --rust: #a84e37;
+  --rust-hover: #883b2a;
   --brass: #a77d2f;
+  --on-accent: #fffdf6;
+  --accent-border: #d9b9ac;
+  --accent-background: #f1e2da;
+  --accent-text: #91412f;
+  --border-soft: #d8d3c4;
+  --seal-border: #bdad85;
+  --progress-track: #e5e1d6;
+  --control-border: #c9c6b9;
+  --footer-rule: #c9c2b0;
+  --gold-color: #96702b;
+  --gold-surface: #f1ead6;
+  --health-color: #a4483e;
+  --health-surface: #f2e3dd;
+  --poison-color: #566e47;
+  --poison-surface: #e5ebdc;
+  --energy-color: #ad7431;
+  --energy-surface: #f1e7d5;
+  --ration-color: #75613d;
+  --ration-surface: #ece7d8;
+  --blessing-border: #c7c3b6;
+  --blessing-intro: #686c60;
+  --card-border: #9da28f;
+  --card-background: repeating-linear-gradient(
+    135deg,
+    #e5e7dc 0 4px,
+    #edf0e7 4px 8px
+  );
+  --card-shadow: #c7c9bd;
+  --empty-text: #88887c;
+  --divine-text: #805b17;
+  --divine-hover: #8e6923;
+  --overlay: rgba(29, 39, 31, 0.56);
+  --modal-border: #c8c0a9;
+  --modal-shadow: 0 18px 60px rgba(12, 20, 14, 0.25);
+  --modal-close: #77786e;
+  --revealed-background: #efede4;
+  --revealed-text: #465044;
+  --report-text: #555c50;
+  --focus-color: #c27845;
+  --selection-text: #fffdf6;
+  --selection-background: #49664e;
+  --texture-line: rgba(80, 74, 57, 0.025);
 }
 
 * {
@@ -25,11 +149,11 @@ body {
   min-width: 320px;
   min-height: 100vh;
   margin: 0;
-  background-color: #f2efe6;
+  background-color: var(--canvas);
   background-image: repeating-linear-gradient(
     0deg,
     transparent 0 31px,
-    rgba(80, 74, 57, 0.025) 31px 32px
+    var(--texture-line) 31px 32px
   );
 }
 
@@ -41,11 +165,11 @@ a {
 
 button:focus-visible,
 a:focus-visible {
-  outline: 3px solid #c27845;
+  outline: 3px solid var(--focus-color);
   outline-offset: 3px;
 }
 
 ::selection {
-  color: #fffdf6;
-  background: #49664e;
+  color: var(--selection-text);
+  background: var(--selection-background);
 }
