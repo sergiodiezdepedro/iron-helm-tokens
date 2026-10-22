@@ -263,13 +263,9 @@ h2 {
 .item-count {
   padding-bottom: 4px;
   color: var(--subtle);
-  font-size: 9px;
+  font-size: 15px;
   font-weight: 800;
   letter-spacing: 1.3px;
-}
-
-.blessing-section .item-count {
-  font-size: 12px;
 }
 
 .token-list {
