@@ -392,14 +392,14 @@ h2 {
 
 .carried-count strong {
   font-family: Georgia, "Palatino Linotype", serif;
-  font-size: 30px;
+  font-size: 32px;
   font-weight: 600;
   line-height: 1;
 }
 
 .carried-count span {
   color: var(--forest);
-  font-size: 7px;
+  font-size: 10px;
   font-weight: 800;
   letter-spacing: 1px;
 }
