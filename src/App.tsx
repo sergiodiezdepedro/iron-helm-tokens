@@ -663,8 +663,7 @@ function App() {
                     min={0}
                     max={total}
                     step={1}
-                    required
-                    value={startingAmounts[id]}
+                    value={startingAmounts[id] === 0 ? "" : startingAmounts[id]}
                     onChange={(event) =>
                       changeStartingAmount(id, event.currentTarget.value)
                     }
