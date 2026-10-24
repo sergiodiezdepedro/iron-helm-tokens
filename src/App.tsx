@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, type FormEvent } from "react";
 import {
   Coins,
   Heart,
@@ -50,6 +50,14 @@ const tokenTypes = [
 
 type TokenId = (typeof tokenTypes)[number]["id"];
 type Inventory = Record<TokenId, number>;
+const startingTokenTypes = [
+  { id: "health", name: "Salud", total: 18, Icon: Heart, color: "health" },
+  { id: "gold", name: "Monedas", total: 12, Icon: Coins, color: "gold" },
+  { id: "energy", name: "Energía", total: 14, Icon: Zap, color: "energy" },
+  { id: "ration", name: "Ración", total: 10, Icon: Wheat, color: "ration" },
+] as const;
+type StartingTokenId = (typeof startingTokenTypes)[number]["id"];
+type StartingAmounts = Record<StartingTokenId, number>;
 type BlessingFace = "poison" | "healthOne" | "healthTwo" | "energy";
 type BlessingState = { pool: BlessingFace[]; held: BlessingFace[] };
 type Theme = "dark" | "light";
@@ -89,10 +97,18 @@ const initialInventory: Inventory = {
   energy: 0,
   ration: 0,
 };
+const initialStartingAmounts: StartingAmounts = {
+  health: 0,
+  gold: 0,
+  energy: 0,
+  ration: 0,
+};
 
 const storageKey = "iron-helm-token-inventory";
 const blessingStorageKey = "iron-helm-blessing-inventory";
 const themeStorageKey = "iron-helm-theme";
+const gameStartedStorageKey = "iron-helm-game-started";
+const startingAmountsStorageKey = "iron-helm-starting-amounts";
 
 function loadTheme(): Theme {
   try {
@@ -152,14 +168,16 @@ function loadInventory(): Inventory {
 
     const parsed: unknown = JSON.parse(saved);
     if (typeof parsed !== "object" || parsed === null) return initialInventory;
+    const healthLimit = loadStartingAmounts().health;
 
     return Object.fromEntries(
       tokenTypes.map(({ id, total }) => {
         const amount = (parsed as Record<string, unknown>)[id];
+        const limit = id === "health" ? healthLimit : total;
         return [
           id,
           typeof amount === "number"
-            ? Math.min(total, Math.max(0, Math.floor(amount)))
+            ? Math.min(limit, Math.max(0, Math.floor(amount)))
             : 0,
         ];
       }),
@@ -169,9 +187,63 @@ function loadInventory(): Inventory {
   }
 }
 
+function loadStartingAmounts(): StartingAmounts {
+  try {
+    const saved = localStorage.getItem(startingAmountsStorageKey);
+    if (saved) {
+      const parsed: unknown = JSON.parse(saved);
+      if (typeof parsed === "object" && parsed !== null) {
+        return Object.fromEntries(
+          startingTokenTypes.map(({ id, total }) => {
+            const amount = (parsed as Record<string, unknown>)[id];
+            return [
+              id,
+              typeof amount === "number"
+                ? Math.min(total, Math.max(0, Math.floor(amount)))
+                : 0,
+            ];
+          }),
+        ) as StartingAmounts;
+      }
+    }
+
+    const savedInventory = localStorage.getItem(storageKey);
+    if (savedInventory) {
+      const inventory: unknown = JSON.parse(savedInventory);
+      if (typeof inventory === "object" && inventory !== null) {
+        const health = (inventory as Record<string, unknown>).health;
+        return {
+          ...initialStartingAmounts,
+          health:
+            typeof health === "number"
+              ? Math.min(18, Math.max(0, Math.floor(health)))
+              : 0,
+        };
+      }
+    }
+
+    return initialStartingAmounts;
+  } catch {
+    return initialStartingAmounts;
+  }
+}
+
+function loadGameStarted(): boolean {
+  try {
+    const saved = localStorage.getItem(gameStartedStorageKey);
+    if (saved !== null) return saved === "true";
+    return localStorage.getItem(storageKey) !== null;
+  } catch {
+    return false;
+  }
+}
+
 function App() {
   const [inventory, setInventory] = useState<Inventory>(loadInventory);
   const [blessings, setBlessings] = useState<BlessingState>(loadBlessings);
+  const [isGameStarted, setIsGameStarted] = useState(loadGameStarted);
+  const [startingAmounts, setStartingAmounts] =
+    useState<StartingAmounts>(loadStartingAmounts);
   const [divineReport, setDivineReport] = useState<DivineReport | null>(null);
   const [isResetDialogOpen, setIsResetDialogOpen] = useState(false);
   const [theme, setTheme] = useState<Theme>(loadTheme);
@@ -188,6 +260,10 @@ function App() {
     Object.values(inventory).reduce((sum, amount) => sum + amount, 0) +
     blessings.pool.length;
   const totalTokens = reserveTokens + carriedTokens;
+  const isGameOver =
+    isGameStarted &&
+    inventory.poison > 0 &&
+    inventory.poison >= inventory.health;
 
   useEffect(() => {
     localStorage.setItem(storageKey, JSON.stringify(inventory));
@@ -201,6 +277,17 @@ function App() {
     document.documentElement.dataset.theme = theme;
     localStorage.setItem(themeStorageKey, theme);
   }, [theme]);
+
+  useEffect(() => {
+    localStorage.setItem(gameStartedStorageKey, String(isGameStarted));
+  }, [isGameStarted]);
+
+  useEffect(() => {
+    localStorage.setItem(
+      startingAmountsStorageKey,
+      JSON.stringify(startingAmounts),
+    );
+  }, [startingAmounts]);
 
   useEffect(() => {
     if (!isResetDialogOpen) return;
@@ -217,7 +304,9 @@ function App() {
     setInventory((current) => ({
       ...current,
       [id]: Math.min(
-        tokenTypes.find((token) => token.id === id)!.total,
+        id === "health"
+          ? startingAmounts.health
+          : tokenTypes.find((token) => token.id === id)!.total,
         Math.max(0, current[id] + change),
       ),
     }));
@@ -231,11 +320,30 @@ function App() {
     setTheme((current) => (current === "dark" ? "light" : "dark"));
   }
 
+  function changeStartingAmount(id: StartingTokenId, value: string) {
+    const token = startingTokenTypes.find((item) => item.id === id)!;
+    const amount = value === "" ? 0 : Math.floor(Number(value));
+    setStartingAmounts((current) => ({
+      ...current,
+      [id]: Math.min(token.total, Math.max(0, amount)),
+    }));
+  }
+
+  function startGame(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    setInventory({ ...initialInventory, ...startingAmounts });
+    setBlessings(createBlessingState());
+    setDivineReport(null);
+    setIsGameStarted(true);
+  }
+
   function confirmResetInventory() {
     setInventory(initialInventory);
     setBlessings(createBlessingState());
     setDivineReport(null);
     setIsResetDialogOpen(false);
+    setStartingAmounts(initialStartingAmounts);
+    setIsGameStarted(false);
   }
 
   function takeBlessing() {
@@ -269,13 +377,16 @@ function App() {
       0,
     );
     const energyReward = faces.filter((face) => face === "energy").length;
-    const healthGained = Math.min(18 - inventory.health, healthReward);
+    const healthGained = Math.min(
+      Math.max(0, startingAmounts.health - inventory.health),
+      healthReward,
+    );
     const energyGained = Math.min(14 - inventory.energy, energyReward);
     const poisonRemoved = faces.includes("poison") ? inventory.poison : 0;
 
     setInventory((current) => ({
       ...current,
-      health: Math.min(18, current.health + healthReward),
+      health: Math.min(startingAmounts.health, current.health + healthReward),
       energy: Math.min(14, current.energy + energyReward),
       poison: faces.includes("poison") ? 0 : current.poison,
     }));
@@ -290,7 +401,7 @@ function App() {
 
   return (
     <main className="app-shell">
-      <header className="topbar">
+      <header className="topbar" inert={!isGameStarted || isGameOver}>
         <a
           className="wordmark"
           href="https://boardgamegeek.com/boardgame/273264/iron-helm"
@@ -327,7 +438,7 @@ function App() {
         </div>
       </header>
 
-      <div className="content" id="inicio">
+      <div className="content" id="inicio" inert={!isGameStarted || isGameOver}>
         <section className="intro" aria-labelledby="page-title">
           <p className="eyebrow">REGISTRO DEL AVENTURERO</p>
           <h1 id="page-title">
@@ -386,7 +497,11 @@ function App() {
                   </div>
                   <div className="token-info">
                     <h3>{name}</h3>
-                    <p>Reserva inicial: {total}</p>
+                    <p>
+                      {id === "health" && isGameStarted
+                        ? `Máximo personal: ${startingAmounts.health}`
+                        : `Reserva inicial: ${total}`}
+                    </p>
                     <div className="progress-track" aria-hidden="true">
                       <span style={{ width: `${(carried / total) * 100}%` }} />
                     </div>
@@ -409,7 +524,11 @@ function App() {
                         className="action-button take-button"
                         type="button"
                         onClick={() => changeAmount(id, 1)}
-                        disabled={available === 0}
+                        disabled={
+                          id === "health"
+                            ? carried >= startingAmounts.health
+                            : available === 0
+                        }
                         aria-label={`Obtener una ficha: ${name}`}>
                         <Plus size={15} aria-hidden="true" />
                         <span>Obtener</span>
@@ -509,7 +628,59 @@ function App() {
         </footer>
       </div>
 
-      {divineReport && (
+      {!isGameStarted && (
+        <div className="report-backdrop">
+          <form
+            className="divine-report setup-dialog"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="setup-title"
+            onSubmit={startGame}>
+            <span className="report-emblem">
+              <Shield size={20} aria-hidden="true" />
+            </span>
+            <p className="eyebrow">PREPARA TU AVENTURA</p>
+            <h2 id="setup-title">Valores iniciales</h2>
+            <p className="report-outcome">
+              Introduce los tokens iniciales de tu personaje. Se descontarán de
+              la reserva común al empezar.
+            </p>
+            <div className="starting-token-grid">
+              {startingTokenTypes.map(({ id, name, total, Icon, color }) => (
+                <label
+                  className="starting-token-field"
+                  key={id}
+                  htmlFor={`starting-${id}`}>
+                  <span className={`starting-token-name ${color}`}>
+                    <Icon size={17} aria-hidden="true" />
+                    {name}
+                  </span>
+                  <span className="starting-token-pool">Pool: {total}</span>
+                  <input
+                    id={`starting-${id}`}
+                    type="number"
+                    inputMode="numeric"
+                    min={0}
+                    max={total}
+                    step={1}
+                    required
+                    value={startingAmounts[id]}
+                    onChange={(event) =>
+                      changeStartingAmount(id, event.currentTarget.value)
+                    }
+                  />
+                </label>
+              ))}
+            </div>
+            <p className="setup-note">Veneno y Bendiciones empiezan en cero.</p>
+            <button className="report-done setup-submit" type="submit">
+              Iniciar partida
+            </button>
+          </form>
+        </div>
+      )}
+
+      {divineReport && !isGameOver && isGameStarted && (
         <div className="report-backdrop">
           <section
             className="divine-report"
@@ -555,7 +726,7 @@ function App() {
         </div>
       )}
 
-      {isResetDialogOpen && (
+      {isResetDialogOpen && !isGameOver && isGameStarted && (
         <div
           className="report-backdrop"
           onClick={(event) => {
@@ -576,8 +747,8 @@ function App() {
             <h2 id="reset-title">Reiniciar cuenta</h2>
             <p className="report-outcome" id="reset-description">
               Se devolverán al arcón todos los tokens y el mazo de Bendiciones
-              volverá a su composición inicial. Esta acción no se puede
-              deshacer.
+              volverá a su composición inicial. Después tendrás que introducir
+              los valores iniciales de la nueva partida.
             </p>
             <div className="reset-actions">
               <button
@@ -594,6 +765,37 @@ function App() {
                 Reiniciar cuenta
               </button>
             </div>
+          </section>
+        </div>
+      )}
+
+      {isGameOver && (
+        <div className="report-backdrop">
+          <section
+            className="divine-report death-dialog"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="death-title"
+            aria-describedby="death-description">
+            <span className="report-emblem death-emblem">
+              <Skull size={22} aria-hidden="true" />
+            </span>
+            <p className="eyebrow">AVENTURA TERMINADA</p>
+            <h2 id="death-title">Has caído</h2>
+            <p className="report-outcome" id="death-description">
+              Tienes {inventory.poison} ficha
+              {inventory.poison === 1 ? "" : "s"} de Veneno y {inventory.health}{" "}
+              ficha
+              {inventory.health === 1 ? "" : "s"} de Salud. El Veneno ha
+              igualado o superado tu Salud; la partida ha terminado.
+            </p>
+            <button
+              className="report-done reset-confirm death-reset"
+              type="button"
+              onClick={confirmResetInventory}>
+              <RotateCcw size={15} aria-hidden="true" />
+              Reiniciar partida
+            </button>
           </section>
         </div>
       )}

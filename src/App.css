@@ -701,6 +701,98 @@ h2 {
   background: var(--rust-hover);
 }
 
+.death-emblem {
+  border-color: var(--rust);
+  background: var(--accent-background);
+  color: var(--rust);
+}
+
+.death-reset {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.setup-dialog {
+  width: min(100%, 520px);
+}
+
+.setup-dialog .report-outcome {
+  margin-bottom: 20px;
+}
+
+.starting-token-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+  text-align: left;
+}
+
+.starting-token-field {
+  min-width: 0;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 8px;
+  padding: 11px;
+  border: 1px solid var(--line);
+  background: var(--revealed-background);
+}
+
+.starting-token-name {
+  min-width: 0;
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  color: var(--ink);
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.starting-token-name.gold {
+  color: var(--gold-color);
+}
+.starting-token-name.health {
+  color: var(--health-color);
+}
+.starting-token-name.energy {
+  color: var(--energy-color);
+}
+.starting-token-name.ration {
+  color: var(--ration-color);
+}
+
+.starting-token-pool {
+  color: var(--subtle);
+  font-size: 10px;
+  white-space: nowrap;
+}
+
+.starting-token-field input {
+  grid-column: 1 / -1;
+  width: 100%;
+  min-height: 42px;
+  padding: 7px 10px;
+  border: 1px solid var(--control-border);
+  border-radius: 2px;
+  background: var(--canvas);
+  color: var(--ink);
+  font: inherit;
+  font-size: 18px;
+  font-weight: 700;
+}
+
+.setup-note {
+  margin: 14px 0 18px;
+  color: var(--subtle);
+  font-size: 12px;
+}
+
+.setup-submit {
+  width: 100%;
+  justify-content: center;
+}
+
 @keyframes appear {
   from {
     opacity: 0;
